@@ -178,11 +178,19 @@ class CDMImporter {
      * Store CDM metadata for later retrieval
      */
     private function storeCDMMetadata($cdm_data) {
-        // Store the complete CDM data as JSON in the course keywords field
+        // Store the COMPLETE CDM data as JSON in the course keywords field
+        // This includes both LessonInfo and LessonInfoExtras for full metadata preservation
+        $complete_metadata = $cdm_data['data']['LessonInfo'];
+
+        // Merge LessonInfoExtras if available
+        if (isset($cdm_data['data']['LessonInfoExtras'])) {
+            $complete_metadata = array_merge($complete_metadata, $cdm_data['data']['LessonInfoExtras']);
+        }
+
         Database::get()->query("UPDATE course SET
             keywords = ?s
             WHERE id = ?d",
-            json_encode($cdm_data['data']['LessonInfo']),
+            json_encode($complete_metadata),
             $this->course_id
         );
     }

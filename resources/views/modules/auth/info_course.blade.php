@@ -385,6 +385,108 @@
             </div>
             @endif
 
+            @if($course_content)
+            <!-- CDM Course Content Summary -->
+            <div class='col-12 mt-4'>
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">
+                            <i class="fa fa-play-circle"></i> Course Content & Resources
+                        </h4>
+                        <small>Videos, Quizzes, and Learning Materials from CDM Import</small>
+                    </div>
+                    <div class="card-body">
+
+                        @if(count($course_content['videos']) > 0)
+                        <!-- Videos Section -->
+                        <div class="mb-4">
+                            <h5><i class="fa fa-video text-danger"></i> Educational Videos</h5>
+                            <div class="row">
+                                @foreach($course_content['videos'] as $video)
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fa fa-play-circle text-danger"></i>
+                                                {{ $video->title }}
+                                            </h6>
+                                            <p class="card-text">{{ $video->description }}</p>
+                                            <a href="{{ $video->url }}" target="_blank" class="btn btn-danger btn-sm">
+                                                <i class="fa fa-external-link"></i> Watch Video
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if(count($course_content['exercises']) > 0)
+                        <!-- Quizzes/Exercises Section -->
+                        <div class="mb-4">
+                            <h5><i class="fa fa-question-circle text-warning"></i> Quizzes & Exercises</h5>
+                            <div class="row">
+                                @foreach($course_content['exercises'] as $exercise)
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100 border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fa fa-quiz text-warning"></i>
+                                                {{ $exercise->title }}
+                                            </h6>
+                                            <p class="card-text">{{ $exercise->description }}</p>
+                                            <a href="{{ $urlServer }}courses/{{ $c->code }}/index.php?course={{ $c->code }}" class="btn btn-warning btn-sm">
+                                                <i class="fa fa-play"></i> Take Quiz
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        @if(count($course_content['documents']) > 0)
+                        <!-- Learning Materials Section -->
+                        <div class="mb-4">
+                            <h5><i class="fa fa-file-text text-info"></i> Learning Materials & Activities</h5>
+                            <div class="row">
+                                @foreach($course_content['documents'] as $document)
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fa fa-document text-info"></i>
+                                                {{ $document->title }}
+                                            </h6>
+                                            @if(strlen($document->comment) > 100)
+                                            <p class="card-text small">{{ substr($document->comment, 0, 100) }}...</p>
+                                            @else
+                                            <p class="card-text small">{{ $document->comment }}</p>
+                                            @endif
+                                            <a href="{{ $urlServer }}courses/{{ $c->code }}/index.php?course={{ $c->code }}" class="btn btn-info btn-sm">
+                                                <i class="fa fa-eye"></i> View Material
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="text-center mt-4">
+                            <a href="{{ $urlServer }}courses/{{ $c->code }}/index.php?course={{ $c->code }}" class="btn btn-primary btn-lg">
+                                <i class="fa fa-graduation-cap"></i> Enter Course & Access All Content
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            @endif
+
             @if (!$c->is_collaborative)
                 <div class='col-12 mt-4'>
                     <div class='row'>

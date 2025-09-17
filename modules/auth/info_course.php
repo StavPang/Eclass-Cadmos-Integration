@@ -47,4 +47,23 @@ if (!empty($c->keywords)) {
     }
 }
 
+// Get course content summary for CDM courses
+$data['course_content'] = null;
+if ($data['cdm_data']) {
+    // Get videos from the course
+    $videos = Database::get()->queryArray("SELECT id, title, url, description FROM videolink WHERE course_id = ?d ORDER BY id", $courseId);
+
+    // Get exercises/quizzes
+    $exercises = Database::get()->queryArray("SELECT id, title, description FROM exercise WHERE course_id = ?d ORDER BY id", $courseId);
+
+    // Get documents with external links
+    $documents = Database::get()->queryArray("SELECT id, title, filename, comment FROM document WHERE course_id = ?d ORDER BY id", $courseId);
+
+    $data['course_content'] = [
+        'videos' => $videos,
+        'exercises' => $exercises,
+        'documents' => $documents
+    ];
+}
+
 view('modules.auth.info_course', $data);
