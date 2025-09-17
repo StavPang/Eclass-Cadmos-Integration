@@ -1,0 +1,32 @@
+{
+    "name"       : "hiqdev/hoa-stream",
+    "description": "The Hiqdev Hoa\\Stream library.",
+    "type"       : "library",
+    "keywords"   : ["library", "stream", "bucket", "composite", "context",
+                    "filter", "in", "out", "wrapper", "protocol"],
+    "license"    : "BSD-3-Clause",
+    "require": {
+        "php"            : ">=7.4",
+        "hoa/consistency": "~1.0",
+        "hoa/event"      : "~1.0",
+        "hoa/exception"  : "~1.0",
+        "hiqdev/hoa-protocol"   : "~1.0"
+    },
+    "require-dev": {
+        "hoa/test": "~2.0"
+    },
+    "replace": {
+        "hoa/stream": "~1.17"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hoa\\Stream\\"      : "Source",
+            "Hoa\\Stream\\Test\\": "Test"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
+    }
+}

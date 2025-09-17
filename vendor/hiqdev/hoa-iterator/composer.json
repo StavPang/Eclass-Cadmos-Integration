@@ -1,0 +1,26 @@
+{
+    "name"       : "hiqdev/hoa-iterator",
+    "description": "The Hiqdev Hoa\\Compiler library.",
+    "type"       : "library",
+    "keywords"   : ["library", "iterator"],
+    "license"    : "BSD-3-Clause",
+    "require": {
+        "php" : ">=7.4",
+        "hoa/consistency": "~1.0",
+        "hoa/exception"  : "~1.0",
+        "hiqdev/hoa-stream": "~1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "hoa/test": "~2.0"
+    },
+    "replace": {
+        "hoa/iterator": "~2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hoa\\Iterator\\"      : "Source",
+            "Hoa\\Iterator\\Test\\": "Test"
+        }
+    }
+}

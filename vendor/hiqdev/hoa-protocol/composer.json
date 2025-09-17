@@ -1,0 +1,27 @@
+{
+    "name"       : "hiqdev/hoa-protocol",
+    "description": "The Hiqdev Hoa\\Protocol library.",
+    "type"       : "library",
+    "keywords"   : ["library", "protocol", "resource", "stream", "wrapper"],
+    "license"    : "BSD-3-Clause",
+    "require": {
+        "php" : ">=7.4",
+        "hoa/consistency": "~1.0",
+        "hoa/exception"  : "~1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "hoa/test": "~2.0"
+    },
+    "replace": {
+        "hoa/protocol": "~1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hoa\\Protocol\\"      : "Source",
+            "Hoa\\Protocol\\Bin\\" : "Bin",
+            "Hoa\\Protocol\\Test\\": "Test"
+        },
+        "files": ["Source/Wrapper.php"]
+    }
+}

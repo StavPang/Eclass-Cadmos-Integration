@@ -38,4 +38,13 @@ $data['course_descriptions'] = Database::get()->queryArray("SELECT cd.id, cd.tit
                                     LEFT JOIN course_description_type cdt ON (cd.type = cdt.id)
                                     WHERE cd.course_id = ?d AND cd.visible = 1 ORDER BY cd.order", $courseId);
 
+// Check for CDM metadata in course keywords field
+$data['cdm_data'] = null;
+if (!empty($c->keywords)) {
+    $cdm_json = json_decode($c->keywords, true);
+    if (json_last_error() === JSON_ERROR_NONE && isset($cdm_json['StrategyName'])) {
+        $data['cdm_data'] = $cdm_json;
+    }
+}
+
 view('modules.auth.info_course', $data);
