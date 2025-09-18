@@ -1,0 +1,20 @@
+[17-Sep-2025 17:34:59 Europe/Athens] cron START
+[17-Sep-2025 17:34:59 Europe/Athens] cron monthlyjob START
+[17-Sep-2025 17:34:59 Europe/Athens] cron summarizeLogins START
+[17-Sep-2025 17:34:59 Europe/Athens] cron summarizeLogins END
+[17-Sep-2025 17:34:59 Europe/Athens] cron summarizeMonthlyActions START
+[17-Sep-2025 17:35:00 Europe/Athens] cron summarizeMonthlyActions END
+[17-Sep-2025 17:35:00 Europe/Athens] cron optimizeIndex START
+[17-Sep-2025 17:35:00 Europe/Athens] cron optimizeIndex END
+[17-Sep-2025 17:35:00 Europe/Athens] cron monthlyjob END
+[17-Sep-2025 17:35:00 Europe/Athens] cron END
+[17-Sep-2025 17:35:35 Europe/Athens] cron START
+[17-Sep-2025 17:35:35 Europe/Athens] cron monthlyjob START
+[17-Sep-2025 17:35:35 Europe/Athens] cron monthlyjob was recently (< 1month) run, skipping ...
+[17-Sep-2025 17:35:35 Europe/Athens] cron monthlyjob END
+[17-Sep-2025 17:35:35 Europe/Athens] cron END
+[17-Sep-2025 17:35:55 Europe/Athens] cron START
+[17-Sep-2025 17:35:55 Europe/Athens] cron monthlyjob START
+[17-Sep-2025 17:35:55 Europe/Athens] cron monthlyjob was recently (< 1month) run, skipping ...
+[17-Sep-2025 17:35:55 Europe/Athens] cron monthlyjob END
+[17-Sep-2025 17:35:55 Europe/Athens] cron END

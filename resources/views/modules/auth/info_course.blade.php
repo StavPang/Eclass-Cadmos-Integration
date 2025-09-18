@@ -401,6 +401,11 @@
                         <!-- Videos Section -->
                         <div class="mb-4">
                             <h5><i class="fa fa-video text-danger"></i> Educational Videos</h5>
+                            <div class="mb-2 text-end">
+                                <a href="{{ $urlServer }}modules/video/index.php?course={{ $c->code }}" class="btn btn-outline-danger btn-sm">
+                                    <i class="fa fa-list"></i> View All Videos
+                                </a>
+                            </div>
                             <div class="row">
                                 @foreach($course_content['videos'] as $video)
                                 <div class="col-md-6 mb-3">
@@ -411,9 +416,14 @@
                                                 {{ $video->title }}
                                             </h6>
                                             <p class="card-text">{{ $video->description }}</p>
-                                            <a href="{{ $video->url }}" target="_blank" class="btn btn-danger btn-sm">
-                                                <i class="fa fa-external-link"></i> Watch Video
-                                            </a>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <a href="{{ $video->url }}" target="_blank" class="btn btn-danger btn-sm">
+                                                    <i class="fa fa-external-link"></i> Watch Now
+                                                </a>
+                                                <a href="{{ $urlServer }}modules/video/index.php?course={{ $c->code }}" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="fa fa-list"></i> Videos Page
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -436,7 +446,7 @@
                                                 {{ $exercise->title }}
                                             </h6>
                                             <p class="card-text">{{ $exercise->description }}</p>
-                                            <a href="{{ $urlServer }}courses/{{ $c->code }}/index.php?course={{ $c->code }}" class="btn btn-warning btn-sm">
+                                            <a href="{{ $urlServer }}modules/exercise/index.php?course={{ $c->code }}" class="btn btn-warning btn-sm">
                                                 <i class="fa fa-play"></i> Take Quiz
                                             </a>
                                         </div>
@@ -465,8 +475,8 @@
                                             @else
                                             <p class="card-text small">{{ $document->comment }}</p>
                                             @endif
-                                            <a href="{{ $urlServer }}courses/{{ $c->code }}/index.php?course={{ $c->code }}" class="btn btn-info btn-sm">
-                                                <i class="fa fa-eye"></i> View Material
+                                            <a href="{{ $urlServer }}modules/document/index.php?course={{ $c->code }}" class="btn btn-info btn-sm">
+                                                <i class="fa fa-eye"></i> View Materials
                                             </a>
                                         </div>
                                     </div>
@@ -477,9 +487,10 @@
                         @endif
 
                         <div class="text-center mt-4">
-                            <a href="{{ $urlServer }}courses/{{ $c->code }}/index.php?course={{ $c->code }}" class="btn btn-primary btn-lg">
-                                <i class="fa fa-graduation-cap"></i> Enter Course & Access All Content
+                            <a href="{{ $urlServer }}courses/{{ $c->code }}/" class="btn btn-primary btn-lg">
+                                <i class="fa fa-graduation-cap"></i> Enter Course Homepage
                             </a>
+                            <p class="text-muted mt-2 small">Access all quizzes, documents, videos, and learning materials inside the course</p>
                         </div>
 
                     </div>

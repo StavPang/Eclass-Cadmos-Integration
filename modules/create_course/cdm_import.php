@@ -159,6 +159,9 @@ class CDMImporter {
 
         list($this->course_code, $this->course_id) = $result;
 
+        // Activate essential modules for the course
+        $this->activateCourseModules();
+
         // Store CDM metadata in course description or custom table
         $this->storeCDMMetadata($cdm_data);
 
@@ -172,6 +175,46 @@ class CDMImporter {
             'full_description' => $full_description,
             'lesson_info' => $lesson_info
         ];
+    }
+
+    /**
+     * Activate essential course modules
+     */
+    private function activateCourseModules() {
+        // Essential modules for CDM courses
+        $essential_modules = [
+            1 => 1,   // Announcements - Active
+            2 => 1,   // Agenda - Active
+            3 => 1,   // Documents - Active (needed for CDM materials)
+            4 => 1,   // Video/Multimedia - Active (needed for CDM videos)
+            5 => 1,   // Exercises - Active (needed for CDM quizzes)
+            6 => 0,   // Assignments - Inactive
+            7 => 1,   // Glossary - Active
+            8 => 1,   // Learning Path - Active
+            9 => 1,   // Links - Active
+            10 => 1,  // Course Units - Active (needed for Think-Pair-Share structure)
+            11 => 0,  // E-Book - Inactive
+            12 => 0,  // Questionnaire - Inactive
+            13 => 0,  // Wiki - Inactive
+            14 => 0,  // Wall/Social - Inactive
+            15 => 0,  // Chat - Inactive
+            16 => 1,  // Forum - Active
+            17 => 0,  // Groups - Inactive
+            18 => 0,  // Dropbox - Inactive
+            19 => 0,  // User Progress - Inactive
+            20 => 0   // Usage Statistics - Inactive
+        ];
+
+        foreach ($essential_modules as $module_id => $visible) {
+            try {
+                Database::get()->query("INSERT INTO course_module (course_id, module_id, visible) VALUES (?d, ?d, ?d)
+                                       ON DUPLICATE KEY UPDATE visible = ?d",
+                                       $this->course_id, $module_id, $visible, $visible);
+            } catch (Exception $e) {
+                // Continue even if module activation fails
+                error_log("Failed to activate module $module_id for course {$this->course_id}: " . $e->getMessage());
+            }
+        }
     }
 
     /**
