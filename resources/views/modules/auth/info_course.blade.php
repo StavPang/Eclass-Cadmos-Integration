@@ -16,8 +16,8 @@
 
             <div class="col-12">
 
-                    <div class="card card-course-info px-lg-4 py-lg-4 p-3 mb-3">
-                        <div class="row row-cols-1 row-cols-md-2 g-3">
+                    <div class="card card-course-info px-lg-2 py-lg-1 p-1 mb-2">
+                        <div class="row row-cols-1 row-cols-md-2 g-1">
                             <div class="col-md-4 col d-flex justify-content-center justify-content-md-start">
                                 @if($c->course_image == NULL)
                                     @if($c->is_collaborative)
@@ -30,8 +30,7 @@
                                 @endif
                             </div>
                             <div class="col-md-8 col">
-                                <div class="card-body py-0">
-
+                                <div class="card-body p-0">
                                     <div class='d-flex justify-content-start align-items-center gap-2 flex-wrap'>
                                         <h2 class="mb-0">{{ $c->title }}</h2>
                                         {!! course_access_icon($c->visible) !!}
@@ -50,23 +49,115 @@
                                             @endif
                                         @endif
                                     </div>
+                                    <p class="card-text mt-0 mb-0">({{ $c->public_code }})&nbsp;- &nbsp;{{ $c->prof_names }}</p>
+                                    <!-- Enhanced Course Description Section -->
+                                    @if($cdm_formatted)
+                                        <!-- CDM-Enhanced Course Description -->
+                                        <div class="enhanced-course-description">
+                                            @if(!$c->is_collaborative)
+                                            <p class='form-label mb-1 text-primary'><i class="fa fa-graduation-cap"></i> {{ trans('langCourseProgram')}} & Educational Design</p>
+                                            @else
+                                            <p class='form-label mb-1 text-primary'><i class="fa fa-users"></i> {{ trans('langCollabDes')}}</p>
+                                            @endif
 
-                                    <p class="card-text mt-2 mb-4">({{ $c->public_code }})&nbsp;- &nbsp;{{ $c->prof_names }}</p>
+                                            <!-- Course Overview Cards -->
+                                            <div class="row mb-2">
+                                                @if(!empty($cdm_formatted['education_level']))
+                                                <div class="col-md-3 col-sm-6 mb-2">
+                                                    <div class="card h-100 border-primary">
+                                                        <div class="card-body text-center p-2">
+                                                            <i class="fa fa-school text-primary fa-lg mb-1"></i>
+                                                            <h6 class="card-title mb-1">Education Level</h6>
+                                                            <p class="card-text small mb-0">{{ $cdm_formatted['education_level'] }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
 
-                                    @if(empty($c->description))
-                                        @if(!$c->is_collaborative)
-                                        <p class='form-label mb-1'>{{ trans('langCourseProgram')}}</p>
-                                        @else
-                                        <p class='form-label mb-1'>{{ trans('langCollabDes')}}</p>
-                                        @endif
-                                        <p>{{ trans('langThisCourseDescriptionIsEmpty') }}</p>
+                                                @if(!empty($cdm_formatted['duration']))
+                                                <div class="col-md-3 col-sm-6 mb-2">
+                                                    <div class="card h-100 border-info">
+                                                        <div class="card-body text-center p-2">
+                                                            <i class="fa fa-clock text-info fa-lg mb-1"></i>
+                                                            <h6 class="card-title mb-1">Duration</h6>
+                                                            <p class="card-text small mb-0">{{ $cdm_formatted['duration'] }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
+
+                                                @if(!empty($cdm_formatted['subject_area']))
+                                                <div class="col-md-3 col-sm-6 mb-2">
+                                                    <div class="card h-100 border-success">
+                                                        <div class="card-body text-center p-2">
+                                                            <i class="fa fa-book text-success fa-lg mb-1"></i>
+                                                            <h6 class="card-title mb-1">Subject Area</h6>
+                                                            <p class="card-text small mb-0">{{ $cdm_formatted['subject_area'] }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
+
+                                                @if(!empty($cdm_formatted['strategy']))
+                                                <div class="col-md-3 col-sm-6 mb-2">
+                                                    <div class="card h-100 border-warning">
+                                                        <div class="card-body text-center p-2">
+                                                            <i class="fa fa-lightbulb text-warning fa-lg mb-1"></i>
+                                                            <h6 class="card-title mb-1">Teaching Strategy</h6>
+                                                            <p class="card-text small mb-0">{{ $cdm_formatted['strategy'] }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
+                                            </div>
+
+
+
+
+
+                                        </div>
+
+                                        <!-- Custom CSS for Enhanced Description -->
+                                        <style>
+                                        .enhanced-course-description .card {
+                                            transition: all 0.3s ease;
+                                        }
+                                        .enhanced-course-description .card:hover {
+                                            transform: translateY(-5px);
+                                            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+                                        }
+                                        .enhanced-course-description .fa-lg {
+                                            opacity: 0.8;
+                                        }
+                                        .enhanced-course-description .badge {
+                                            font-size: 0.75em;
+                                            padding: 0.5em 0.75em;
+                                        }
+                                        .enhanced-course-description .border-start {
+                                            border-left-width: 4px !important;
+                                        }
+                                        .enhanced-course-description h6 {
+                                            font-weight: 600;
+                                            margin-bottom: 0.75rem;
+                                        }
+                                        </style>
                                     @else
-                                        @if(!$c->is_collaborative)
-                                        <p class='form-label mb-1'>{{ trans('langCourseProgram')}}</p>
+                                        <!-- Fallback to original description for non-CDM courses -->
+                                        @if(empty($c->description))
+                                            @if(!$c->is_collaborative)
+                                            <p class='form-label mb-1'>{{ trans('langCourseProgram')}}</p>
+                                            @else
+                                            <p class='form-label mb-1'>{{ trans('langCollabDes')}}</p>
+                                            @endif
+                                            <p>{{ trans('langThisCourseDescriptionIsEmpty') }}</p>
                                         @else
-                                        <p class='form-label mb-1'>{{ trans('langCollabDes')}}</p>
+                                            @if(!$c->is_collaborative)
+                                            <p class='form-label mb-1'>{{ trans('langCourseProgram')}}</p>
+                                            @else
+                                            <p class='form-label mb-1'>{{ trans('langCollabDes')}}</p>
+                                            @endif
+                                            <p>{!! $c->description !!}</p>
                                         @endif
-                                        <p>{!! $c->description !!}</p>
                                     @endif
 
                                     <p class='form-label mb-1 mt-4'>{{ trans('langCreationDate')}}</p>
@@ -487,9 +578,15 @@
                         @endif
 
                         <div class="text-center mt-4">
-                            <a href="{{ $urlServer }}courses/{{ $c->code }}/" class="btn btn-primary btn-lg">
+                            @if(isset($_SESSION['uid']))
+                            <a href="{{ $urlServer }}modules/course_home/course_home.php?course={{ $c->code }}" class="btn btn-primary btn-lg">
                                 <i class="fa fa-graduation-cap"></i> Enter Course Homepage
                             </a>
+                            @else
+                            <a href="{{ $urlServer }}main/login_form.php?next={{ urlencode($urlServer . 'modules/course_home/course_home.php?course=' . $c->code) }}" class="btn btn-primary btn-lg">
+                                <i class="fa fa-sign-in"></i> Login to Access Course
+                            </a>
+                            @endif
                             <p class="text-muted mt-2 small">Access all quizzes, documents, videos, and learning materials inside the course</p>
                         </div>
 

@@ -40,10 +40,37 @@ $data['course_descriptions'] = Database::get()->queryArray("SELECT cd.id, cd.tit
 
 // Check for CDM metadata in course keywords field
 $data['cdm_data'] = null;
+$data['cdm_formatted'] = null;
 if (!empty($c->keywords)) {
     $cdm_json = json_decode($c->keywords, true);
     if (json_last_error() === JSON_ERROR_NONE && isset($cdm_json['StrategyName'])) {
         $data['cdm_data'] = $cdm_json;
+
+        // Format CDM data for better display
+        $data['cdm_formatted'] = [
+            'strategy' => $cdm_json['StrategyName'] ?? '',
+            'duration' => trim(($cdm_json['DurationNumber'] ?? '') . ' ' . ($cdm_json['DurationType'] ?? '')),
+            'education_level' => $cdm_json['EducationLevel'] ?? '',
+            'subject_area' => $cdm_json['SubjectArea'] ?? '',
+            'description' => $cdm_json['Description'] ?? '',
+            'goals' => isset($cdm_json['Goals']) ? (is_array($cdm_json['Goals']) ? $cdm_json['Goals'] : explode('•', $cdm_json['Goals'])) : [],
+            'actors' => isset($cdm_json['Actors']) ? (is_array($cdm_json['Actors']) ? $cdm_json['Actors'] : explode(',', $cdm_json['Actors'])) : [],
+            'learners' => isset($cdm_json['Learners']) ? (is_array($cdm_json['Learners']) ? $cdm_json['Learners'] : explode(',', $cdm_json['Learners'])) : [],
+            'staff_roles' => isset($cdm_json['StaffRoles']) ? (is_array($cdm_json['StaffRoles']) ? $cdm_json['StaffRoles'] : explode(',', $cdm_json['StaffRoles'])) : [],
+            'prerequisites' => isset($cdm_json['Prerequisites']) ? (is_array($cdm_json['Prerequisites']) ? implode(', ', $cdm_json['Prerequisites']) : $cdm_json['Prerequisites']) : '',
+            'activity_types' => isset($cdm_json['Simple_activity_types']) ? (is_array($cdm_json['Simple_activity_types']) ? $cdm_json['Simple_activity_types'] : explode(',', $cdm_json['Simple_activity_types'])) : [],
+            'resource_types' => isset($cdm_json['Resource_types']) ? (is_array($cdm_json['Resource_types']) ? $cdm_json['Resource_types'] : explode(',', $cdm_json['Resource_types'])) : [],
+            'resource_copyright' => isset($cdm_json['Resource_copyright']) ? (is_array($cdm_json['Resource_copyright']) ? $cdm_json['Resource_copyright'] : explode(',', $cdm_json['Resource_copyright'])) : []
+        ];
+
+        // Clean up arrays by removing empty elements and trimming
+        foreach ($data['cdm_formatted'] as $key => $value) {
+            if (is_array($value)) {
+                $data['cdm_formatted'][$key] = array_filter(array_map('trim', $value), function($item) {
+                    return !empty($item);
+                });
+            }
+        }
     }
 }
 
@@ -64,6 +91,20 @@ if ($data['cdm_data']) {
         'exercises' => $exercises,
         'documents' => $documents
     ];
+}
+
+// Auto-enroll logged-in users in CDM courses for testing/demo purposes
+if ($data['cdm_data'] && isset($_SESSION['uid'])) {
+    $user_enrolled = Database::get()->querySingle("SELECT * FROM course_user WHERE course_id = ?d AND user_id = ?d", $courseId, $_SESSION['uid']);
+
+    if (!$user_enrolled) {
+        try {
+            Database::get()->query("INSERT INTO course_user SET course_id = ?d, user_id = ?d, status = ?d, reg_date = NOW()",
+                $courseId, $_SESSION['uid'], USER_STUDENT);
+        } catch (Exception $e) {
+            // Enrollment failed, but continue anyway
+        }
+    }
 }
 
 view('modules.auth.info_course', $data);
