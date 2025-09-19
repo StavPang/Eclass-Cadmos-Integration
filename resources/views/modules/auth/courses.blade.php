@@ -96,7 +96,7 @@
                                         <div class='d-flex justify-content-start align-items-start gap-3 flex-wrap'>
                                             <div>
                                                 @if ($mycourse->visible == COURSE_OPEN or $unlock_all_courses or isset($myCourses[$mycourse->id])) {{-- open course or user is registered to it --}}
-                                                    <a class='TextBold' href="../../courses/{{ urlencode($mycourse->k) }}/">{{ $mycourse->i }}</a>
+                                                    <a class='TextBold' href="{{ $urlServer }}modules/course_home/course_home.php?course={{ urlencode($mycourse->k) }}">{{ $mycourse->i }}</a>
                                                     &nbsp;<small>({{ $mycourse->c }})</small>
                                                 @else
                                                     <span @if (isset($_SESSION['uid'])) id='cid{{ $mycourse->id }}' @endif class='TextBold'>

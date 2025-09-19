@@ -653,7 +653,7 @@
                                                                     <div class='card-body'>
 
                                                                         <div class="lesson-title line-height-default">
-                                                                            <a class='TextBold' href="{{$urlServer}}courses/{{$course->code}}/">
+                                                                            <a class='TextBold' href="{{$urlServer}}modules/course_home/course_home.php?course={{$course->code}}">
                                                                                 {{ $course->title }}&nbsp;({{ $course->public_code }})
                                                                             </a>
                                                                         </div>
@@ -696,7 +696,7 @@
                                                                                     </div>
                                                                                     <div class="modal-body">
                                                                                         <p class='text-center mb-3'>
-                                                                                            <a class='TextBold' href="{{ $urlServer }}courses/{{ $course->code }}/index.php">
+                                                                                            <a class='TextBold' href="{{ $urlServer }}modules/course_home/course_home.php?course={{ $course->code }}">
                                                                                                 {{ $course->title }}
                                                                                             </a>
                                                                                         </p>
