@@ -544,8 +544,11 @@
                                                     {{ trans('langRegister') }}
                                                 </a>
                                                 @if ($_SESSION['status'] == USER_TEACHER or $is_power_user or $is_departmentmanage_user)
-                                                    <a id="btn_create_course" class="btn submitAdminBtnDefault" href="{{ $urlAppend }}modules/create_course/create_course.php">
+                                                    <a id="btn_create_course" class="btn submitAdminBtnDefault me-2" href="{{ $urlAppend }}modules/create_course/create_course.php">
                                                         <i class="fa-solid fa-plus"></i>&nbsp;{{ trans('langCreate') }}
+                                                    </a>
+                                                    <a id="btn_upload_cdm" class="btn submitAdminBtnDefault" href="{{ $urlAppend }}modules/create_course/cdm_import.php">
+                                                        <i class="fa-solid fa-upload"></i>&nbsp;{{ trans('langUpload') }} CDM
                                                     </a>
                                                 @endif
                                             </div>

@@ -27,6 +27,7 @@ require_once 'functions.php';
 
 $toolName = "CDM Course Import";
 $pageName = "Import Course from CDM File";
+$navigation[] = array('url' => '../../main/portfolio.php', 'name' => $langPortfolio);
 
 // CDM to OpenEClass mapping class
 class CDMImporter {
@@ -748,8 +749,8 @@ $data['menuTypeID'] = 1;
         </div>
 
         <div style="text-align: center; margin-top: 40px; border-top: 1px solid #dee2e6; padding-top: 30px;">
-            <a href="<?php echo $urlAppend; ?>/modules/create_course/" class="btn btn-secondary">
-                ← Back to Course Creation
+            <a href="<?php echo $urlAppend; ?>main/portfolio.php" class="btn btn-secondary">
+                ← Back to Portfolio
             </a>
         </div>
     </div>
