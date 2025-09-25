@@ -83,13 +83,40 @@ if ($data['cdm_data']) {
     // Get exercises/quizzes
     $exercises = Database::get()->queryArray("SELECT id, title, description FROM exercise WHERE course_id = ?d ORDER BY id", $courseId);
 
-    // Get documents with external links
-    $documents = Database::get()->queryArray("SELECT id, title, filename, comment FROM document WHERE course_id = ?d ORDER BY id", $courseId);
+    // Get CDM activities from keywords (new format) or documents (legacy format)
+    $cdm_activities = [];
+
+    // First try new format from keywords
+    if (isset($data['cdm_data']['CDM_Activities'])) {
+        $cdm_activities = $data['cdm_data']['CDM_Activities'];
+    } else if (!empty($c->keywords)) {
+        $all_keywords = json_decode($c->keywords, true);
+        if (isset($all_keywords['CDM_Activities'])) {
+            $cdm_activities = $all_keywords['CDM_Activities'];
+        }
+    }
+
+    // If no activities found in keywords, fall back to documents for legacy CDM courses
+    if (empty($cdm_activities)) {
+        $documents = Database::get()->queryArray("SELECT id, title, filename, comment FROM document WHERE course_id = ?d ORDER BY id", $courseId);
+        // Convert documents to activity format for backward compatibility
+        foreach ($documents as $doc) {
+            $cdm_activities[] = [
+                'title' => $doc->title,
+                'description' => $doc->comment,
+                'type' => 'Learning Activity',
+                'actor' => '',
+                'facilitator' => '',
+                'facilitator_role' => '',
+                'legacy' => true // Mark as legacy format
+            ];
+        }
+    }
 
     $data['course_content'] = [
         'videos' => $videos,
         'exercises' => $exercises,
-        'documents' => $documents
+        'cdm_activities' => $cdm_activities
     ];
 }
 

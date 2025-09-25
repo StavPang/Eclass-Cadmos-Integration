@@ -286,17 +286,56 @@ class CDMImporter {
                     $this->createExercise($activity);
                     break;
                 default:
-                    $this->createDocument($activity);
+                    // Store as CDM activity instead of document
+                    $this->storeCDMActivity($activity);
                     break;
             }
         } else {
-            // Create comprehensive document for activity types
-            $this->createDocument($activity);
+            // Store learning activities as CDM activities, not documents
+            $this->storeCDMActivity($activity);
         }
     }
 
     /**
-     * Create enhanced document from activity with all available details
+     * Store CDM activity as independent learning content (not as document)
+     */
+    private function storeCDMActivity($activity) {
+        $modal_data = $activity['ModalData'] ?? [];
+        $title = $modal_data['Title'] ?? 'Activity';
+        $description = $modal_data['Description'] ?? '';
+        $type = $modal_data['Type'] ?? 'Learning Activity';
+
+        // Store CDM activity in course keywords as structured data
+        $existing_keywords = Database::get()->querySingle("SELECT keywords FROM course WHERE id = ?d", $this->course_id);
+        $keywords_data = json_decode($existing_keywords->keywords ?? '{}', true);
+
+        if (!isset($keywords_data['CDM_Activities'])) {
+            $keywords_data['CDM_Activities'] = [];
+        }
+
+        // Add activity to CDM activities collection
+        $activity_data = [
+            'title' => $title,
+            'description' => $description,
+            'type' => $type,
+            'actor' => $modal_data['Actor'] ?? '',
+            'facilitator' => $modal_data['Facilitator'] ?? '',
+            'facilitator_role' => $modal_data['FacilitatorRole'] ?? '',
+            'learning_goals' => $modal_data['LearningGoal'] ?? [],
+            'author' => $modal_data['Author'] ?? '',
+            'copyright' => $modal_data['Copyright'] ?? '',
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+
+        $keywords_data['CDM_Activities'][] = $activity_data;
+
+        // Update course keywords with CDM activities
+        Database::get()->query("UPDATE course SET keywords = ?s WHERE id = ?d",
+            json_encode($keywords_data), $this->course_id);
+    }
+
+    /**
+     * Create enhanced document from activity with all available details (legacy method)
      */
     private function createDocument($activity) {
         $modal_data = $activity['ModalData'] ?? [];

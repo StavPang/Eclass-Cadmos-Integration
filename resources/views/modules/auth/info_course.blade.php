@@ -554,32 +554,140 @@
                         </div>
                         @endif
 
-                        @if(count($course_content['documents']) > 0)
-                        <!-- Learning Materials Section -->
+                        @if(isset($course_content['cdm_activities']) && count($course_content['cdm_activities']) > 0)
+                        <!-- Learning Materials & Activities Section -->
                         <div class="mb-4">
-                            <h5><i class="fa fa-file-text text-info"></i> Learning Materials & Activities</h5>
+                            <h5><i class="fa fa-graduation-cap text-info"></i> Learning Materials & Activities</h5>
                             <div class="row">
-                                @foreach($course_content['documents'] as $document)
+                                @foreach($course_content['cdm_activities'] as $activity)
                                 <div class="col-md-4 mb-3">
                                     <div class="card h-100 border-info">
                                         <div class="card-body">
                                             <h6 class="card-title">
-                                                <i class="fa fa-document text-info"></i>
-                                                {{ $document->title }}
+                                                <i class="fa fa-lightbulb text-info"></i>
+                                                {{ $activity['title'] }}
                                             </h6>
-                                            @if(strlen($document->comment) > 100)
-                                            <p class="card-text small">{{ substr($document->comment, 0, 100) }}...</p>
-                                            @else
-                                            <p class="card-text small">{{ $document->comment }}</p>
+                                            @if(!empty($activity['type']))
+                                            <div class="mb-2">
+                                                <span class="badge bg-info">{{ $activity['type'] }}</span>
+                                            </div>
                                             @endif
-                                            <a href="{{ $urlServer }}modules/document/index.php?course={{ $c->code }}" class="btn btn-info btn-sm">
-                                                <i class="fa fa-eye"></i> View Materials
-                                            </a>
+                                            @if(!empty($activity['description']))
+                                            <p class="card-text small">
+                                                @if(strlen($activity['description']) > 100)
+                                                    {{ substr($activity['description'], 0, 100) }}...
+                                                @else
+                                                    {{ $activity['description'] }}
+                                                @endif
+                                            </p>
+                                            @endif
+                                            @if(!empty($activity['actor']))
+                                            <div class="mb-1">
+                                                <small class="text-muted">
+                                                    <i class="fa fa-users"></i> {{ $activity['actor'] }}
+                                                </small>
+                                            </div>
+                                            @endif
+                                            @if(!empty($activity['facilitator_role']))
+                                            <div class="mb-1">
+                                                <small class="text-muted">
+                                                    <i class="fa fa-user-tie"></i> {{ $activity['facilitator_role'] }}
+                                                </small>
+                                            </div>
+                                            @endif
+                                            <div class="mt-2">
+                                                <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#activityModal{{ $loop->index }}">
+                                                    <i class="fa fa-eye"></i> View Content
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 @endforeach
                             </div>
+
+                            <!-- Activity Modals -->
+                            @foreach($course_content['cdm_activities'] as $activity)
+                            <div class="modal fade" id="activityModal{{ $loop->index }}" tabindex="-1" aria-labelledby="activityModalLabel{{ $loop->index }}" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="activityModalLabel{{ $loop->index }}">
+                                                <i class="fa fa-lightbulb text-info"></i>
+                                                {{ $activity['title'] }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            @if(!empty($activity['type']))
+                                            <div class="mb-3">
+                                                <strong>Activity Type:</strong>
+                                                <span class="badge bg-info ms-2">{{ $activity['type'] }}</span>
+                                            </div>
+                                            @endif
+
+                                            @if(!empty($activity['description']))
+                                            <div class="mb-3">
+                                                <strong>Description:</strong>
+                                                <div class="mt-2 p-3 bg-light rounded">
+                                                    {!! nl2br(e($activity['description'])) !!}
+                                                </div>
+                                            </div>
+                                            @endif
+
+                                            @if(!empty($activity['actor']))
+                                            <div class="mb-3">
+                                                <strong>Target Audience:</strong>
+                                                <span class="ms-2">{{ $activity['actor'] }}</span>
+                                            </div>
+                                            @endif
+
+                                            @if(!empty($activity['facilitator']))
+                                            <div class="mb-3">
+                                                <strong>Facilitator:</strong>
+                                                <span class="ms-2">{{ $activity['facilitator'] }}</span>
+                                            </div>
+                                            @endif
+
+                                            @if(!empty($activity['facilitator_role']))
+                                            <div class="mb-3">
+                                                <strong>Facilitator Role:</strong>
+                                                <span class="ms-2">{{ $activity['facilitator_role'] }}</span>
+                                            </div>
+                                            @endif
+
+                                            @if(!empty($activity['learning_goals']) && is_array($activity['learning_goals']))
+                                            <div class="mb-3">
+                                                <strong>Learning Goals:</strong>
+                                                <ul class="mt-2">
+                                                    @foreach($activity['learning_goals'] as $goal)
+                                                    <li>{{ $goal }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                            @endif
+
+                                            @if(!empty($activity['author']))
+                                            <div class="mb-3">
+                                                <strong>Author:</strong>
+                                                <span class="ms-2">{{ $activity['author'] }}</span>
+                                            </div>
+                                            @endif
+
+                                            @if(!empty($activity['copyright']))
+                                            <div class="mb-3">
+                                                <strong>Copyright:</strong>
+                                                <span class="ms-2">{{ $activity['copyright'] }}</span>
+                                            </div>
+                                            @endif
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
                         @endif
 
