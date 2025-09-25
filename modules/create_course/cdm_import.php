@@ -411,8 +411,21 @@ class CDMImporter {
             $content .= "</div>";
         }
 
-        // Create the document
-        $filename = preg_replace('/[^a-zA-Z0-9_-]/', '_', $title) . '.html';
+        // Create the document with proper extension and MIME type
+        $safe_title = preg_replace('/[^a-zA-Z0-9_-]/', '_', $title);
+
+        // Determine file extension based on content type
+        $modal_data = $activity['ModalData'] ?? [];
+        $resource_location = $modal_data['ResourceLocation'] ?? '';
+
+        if (!empty($resource_location)) {
+            // If it's a URL resource, create as HTML
+            $filename = $safe_title . '.html';
+        } else {
+            // For text activities, create as HTML document
+            $filename = $safe_title . '.html';
+        }
+
         $file_path = '/' . $filename;
         $course_dir = $GLOBALS['webDir'] . '/courses/' . $this->course_code . '/document';
 
@@ -421,11 +434,14 @@ class CDMImporter {
             mkdir($course_dir, 0755, true);
         }
 
-        // Write content to file
-        file_put_contents($course_dir . '/' . $filename, $content);
-
         $file_creator = $_SESSION['givenname'] . ' ' . $_SESSION['surname'];
         $current_date = date('Y-m-d G:i:s');
+
+        // Add proper HTML DOCTYPE and head tags for better rendering
+        $html_content = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset='UTF-8'>\n<title>" . htmlspecialchars($title) . "</title>\n<style>body{font-family:Arial,sans-serif;margin:20px;line-height:1.6;}</style>\n</head>\n<body>\n" . $content . "\n</body>\n</html>";
+
+        // Write content to file
+        file_put_contents($course_dir . '/' . $filename, $html_content);
 
         Database::get()->query("INSERT INTO document SET
             course_id = ?d,
@@ -440,7 +456,8 @@ class CDMImporter {
             title = ?s,
             creator = ?s,
             date = ?t,
-            date_modified = ?t",
+            date_modified = ?t,
+            format = '.html'",
             $this->course_id,
             $file_path,
             $filename,
