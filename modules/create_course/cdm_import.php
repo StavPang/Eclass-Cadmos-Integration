@@ -884,6 +884,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['cdm_file'])) {
         $data['course_info'] = $result;
         $data['course_url'] = $urlAppend . "courses/" . $result['course_code'] . "/";
 
+        // Debug: Log the course_id value
+        error_log("CDM Import - Course ID: " . $result['course_id'] . ", Course Code: " . $result['course_code']);
+
     } catch (Exception $e) {
         $data['error_message'] = "Error: " . $e->getMessage();
     }
@@ -955,6 +958,10 @@ $data['menuTypeID'] = 1;
                                     <?php echo htmlspecialchars($data['course_info']['course_code']); ?>
                                 </div>
                                 <div class="detail-item">
+                                    <span class="detail-label">Course ID:</span>
+                                    <?php echo htmlspecialchars($data['course_info']['course_id']); ?>
+                                </div>
+                                <div class="detail-item">
                                     <span class="detail-label">Title:</span>
                                     <?php echo htmlspecialchars($data['course_info']['title']); ?>
                                 </div>
@@ -996,7 +1003,7 @@ $data['menuTypeID'] = 1;
                             <a href="<?php echo htmlspecialchars($data['course_url']); ?>" class="btn btn-success">
                                 👁️ View Course
                             </a>
-                            <a href="<?php echo $urlAppend; ?>modules/auth/info_course.php?c=<?php echo $data['course_info']['course_id']; ?>" class="btn btn-info">
+                            <a href="<?php echo $urlAppend; ?>modules/auth/info_course.php?c=<?php echo $data['course_info']['course_code']; ?>" class="btn btn-info">
                                 📋 Course Info Page
                             </a>
                         </div>
