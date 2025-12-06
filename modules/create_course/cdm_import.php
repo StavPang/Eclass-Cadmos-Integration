@@ -862,6 +862,17 @@ class CDMImporter {
 
 // Handle file upload and processing
 $data = array();
+
+// Check if we're displaying a success message from redirect
+if (isset($_GET['success']) && isset($_SESSION['cdm_import_success'])) {
+    $data['success_message'] = "Course successfully imported with full CDM details!";
+    $data['course_info'] = $_SESSION['cdm_import_success'];
+    $data['course_url'] = $urlAppend . "courses/" . $_SESSION['cdm_import_success']['course_code'] . "/";
+
+    // Clear the session data after displaying
+    unset($_SESSION['cdm_import_success']);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['cdm_file'])) {
     try {
         $upload_file = $_FILES['cdm_file'];
@@ -880,12 +891,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['cdm_file'])) {
         $cdm_data = $importer->extractCDM($upload_file['tmp_name']);
         $result = $importer->createCourse($cdm_data);
 
-        $data['success_message'] = "Course successfully imported with full CDM details!";
-        $data['course_info'] = $result;
-        $data['course_url'] = $urlAppend . "courses/" . $result['course_code'] . "/";
+        // Store success data in session
+        $_SESSION['cdm_import_success'] = $result;
 
         // Debug: Log the course_id value
         error_log("CDM Import - Course ID: " . $result['course_id'] . ", Course Code: " . $result['course_code']);
+
+        // Redirect to prevent form resubmission (POST/Redirect/Get pattern)
+        header('Location: ' . $urlAppend . 'modules/create_course/cdm_import.php?success=1');
+        exit;
 
     } catch (Exception $e) {
         $data['error_message'] = "Error: " . $e->getMessage();
