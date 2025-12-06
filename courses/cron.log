@@ -28,3 +28,8 @@
 [24-Sep-2025 18:21:29 Europe/Athens] cron monthlyjob was recently (< 1month) run, skipping ...
 [24-Sep-2025 18:21:29 Europe/Athens] cron monthlyjob END
 [24-Sep-2025 18:21:29 Europe/Athens] cron END
+[25-Sep-2025 16:13:25 Europe/Athens] cron START
+[25-Sep-2025 16:13:25 Europe/Athens] cron monthlyjob START
+[25-Sep-2025 16:13:25 Europe/Athens] cron monthlyjob was recently (< 1month) run, skipping ...
+[25-Sep-2025 16:13:25 Europe/Athens] cron monthlyjob END
+[25-Sep-2025 16:13:25 Europe/Athens] cron END

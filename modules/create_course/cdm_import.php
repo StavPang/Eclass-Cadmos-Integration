@@ -161,6 +161,9 @@ class CDMImporter {
 
         list($this->course_code, $this->course_id) = $result;
 
+        // Create course index.php file
+        $this->createCourseIndexFile();
+
         // Activate essential modules for the course
         $this->activateCourseModules();
 
@@ -180,6 +183,24 @@ class CDMImporter {
     }
 
     /**
+     * Create course index.php file for course access
+     */
+    private function createCourseIndexFile() {
+        $course_dir = $GLOBALS['webDir'] . '/courses/' . $this->course_code;
+
+        if (!is_dir($course_dir)) {
+            mkdir($course_dir, 0755, true);
+        }
+
+        $index_content = "<?php\n";
+        $index_content .= "session_start();\n";
+        $index_content .= "\$_SESSION['dbname']='" . $this->course_code . "';\n";
+        $index_content .= "include '../../modules/course_home/course_home.php';\n";
+
+        file_put_contents($course_dir . '/index.php', $index_content);
+    }
+
+    /**
      * Activate essential course modules
      */
     private function activateCourseModules() {
@@ -190,14 +211,14 @@ class CDMImporter {
             3 => 1,   // Documents - Active (needed for CDM materials)
             4 => 1,   // Video/Multimedia - Active (needed for CDM videos)
             5 => 1,   // Exercises - Active (needed for CDM quizzes)
-            6 => 0,   // Assignments - Inactive
+            6 => 1,   // Assignments - Active (needed for CDM assessments)
             7 => 1,   // Glossary - Active
             8 => 1,   // Learning Path - Active
             9 => 1,   // Links - Active
             10 => 1,  // Course Units - Active (needed for Think-Pair-Share structure)
             11 => 0,  // E-Book - Inactive
             12 => 0,  // Questionnaire - Inactive
-            13 => 0,  // Wiki - Inactive
+            13 => 1,  // Wiki - Active (needed for CDM wiki content)
             14 => 0,  // Wall/Social - Inactive
             15 => 0,  // Chat - Inactive
             16 => 1,  // Forum - Active
@@ -284,6 +305,15 @@ class CDMImporter {
                     break;
                 case 'quiz':
                     $this->createExercise($activity);
+                    break;
+                case 'assessment':
+                    $this->createAssignment($activity);
+                    break;
+                case 'forum':
+                    $this->createForumTopic($activity);
+                    break;
+                case 'wiki':
+                    $this->createWikiPage($activity);
                     break;
                 default:
                     // Store as CDM activity instead of document
@@ -523,6 +553,256 @@ class CDMImporter {
     }
 
     /**
+     * Create assignment from activity (Assessment → work/Εργασίες)
+     */
+    private function createAssignment($activity) {
+        $modal_data = $activity['ModalData'] ?? [];
+        $title = $modal_data['Title'] ?? 'Assignment';
+        $description = $modal_data['Description'] ?? '';
+
+        // Add learning goals to assignment description
+        if (!empty($modal_data['LearningGoal'])) {
+            $description .= "<br><strong>Learning Objectives:</strong><ul>";
+            foreach ($modal_data['LearningGoal'] as $goal) {
+                $description .= "<li>" . htmlspecialchars($goal) . "</li>";
+            }
+            $description .= "</ul>";
+        }
+
+        // Add facilitator instructions if available
+        if (!empty($modal_data['FacilitatorRole'])) {
+            $description .= "<br><strong>Instructions for Facilitator:</strong><br>";
+            $description .= htmlspecialchars($modal_data['FacilitatorRole']);
+        }
+
+        $result = Database::get()->query("INSERT INTO assignment SET
+            course_id = ?d,
+            title = ?s,
+            description = ?s,
+            comments = '',
+            deadline = DATE_ADD(NOW(), INTERVAL 7 DAY),
+            late_submission = 1,
+            submission_date = NOW(),
+            active = 1,
+            secret_directory = ?s",
+            $this->course_id,
+            $title,
+            $description,
+            uniqid()
+        );
+    }
+
+    /**
+     * Create forum topic from activity (Forum → Συζητήσεις/Forum)
+     */
+    private function createForumTopic($activity) {
+        $modal_data = $activity['ModalData'] ?? [];
+        $title = $modal_data['Title'] ?? 'Discussion Topic';
+        $description = $modal_data['Description'] ?? '';
+
+        // Create forum if it doesn't exist
+        $forum_id = $this->ensureDefaultForum();
+
+        // Build topic content
+        $topic_content = $description;
+        if (!empty($modal_data['LearningGoal'])) {
+            $topic_content .= "<br><br><strong>Discussion Goals:</strong><ul>";
+            foreach ($modal_data['LearningGoal'] as $goal) {
+                $topic_content .= "<li>" . htmlspecialchars($goal) . "</li>";
+            }
+            $topic_content .= "</ul>";
+        }
+
+        // Add facilitator guidelines
+        if (!empty($modal_data['FacilitatorRole'])) {
+            $topic_content .= "<br><strong>Facilitator Guidelines:</strong><br>";
+            $topic_content .= htmlspecialchars($modal_data['FacilitatorRole']);
+        }
+
+        $result = Database::get()->query("INSERT INTO forum_topic SET
+            forum_id = ?d,
+            title = ?s,
+            poster_id = ?d,
+            topic_time = NOW(),
+            num_views = 0,
+            num_replies = 0,
+            locked = 0",
+            $forum_id,
+            $title,
+            $_SESSION['uid']
+        );
+
+        $topic_id = $result->lastInsertID;
+
+        // Create initial post
+        $post_result = Database::get()->query("INSERT INTO forum_post SET
+            topic_id = ?d,
+            poster_id = ?d,
+            post_text = ?s,
+            post_time = NOW(),
+            poster_ip = ?s",
+            $topic_id,
+            $_SESSION['uid'],
+            $topic_content,
+            $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1'
+        );
+
+        $post_id = $post_result->lastInsertID;
+
+        // Update forum statistics
+        Database::get()->query("UPDATE forum SET
+            num_topics = num_topics + 1,
+            num_posts = num_posts + 1,
+            last_post_id = ?d
+            WHERE id = ?d",
+            $post_id,
+            $forum_id
+        );
+
+        // Update topic statistics
+        Database::get()->query("UPDATE forum_topic SET
+            last_post_id = ?d
+            WHERE id = ?d",
+            $post_id,
+            $topic_id
+        );
+    }
+
+    /**
+     * Create wiki page from activity (Wiki → Wiki)
+     */
+    private function createWikiPage($activity) {
+        $modal_data = $activity['ModalData'] ?? [];
+        $title = $modal_data['Title'] ?? 'Wiki Page';
+        $description = $modal_data['Description'] ?? '';
+
+        // Build wiki content
+        $wiki_content = "<h2>" . htmlspecialchars($title) . "</h2>\n\n";
+        $wiki_content .= $description . "\n\n";
+
+        // Add learning objectives as wiki content
+        if (!empty($modal_data['LearningGoal'])) {
+            $wiki_content .= "== Learning Objectives ==\n";
+            foreach ($modal_data['LearningGoal'] as $goal) {
+                $wiki_content .= "* " . htmlspecialchars($goal) . "\n";
+            }
+            $wiki_content .= "\n";
+        }
+
+        // Add activity instructions
+        if (!empty($modal_data['FacilitatorRole'])) {
+            $wiki_content .= "== Activity Instructions ==\n";
+            $wiki_content .= htmlspecialchars($modal_data['FacilitatorRole']) . "\n\n";
+        }
+
+        // Add author information
+        if (!empty($modal_data['Author'])) {
+            $wiki_content .= "== Author ==\n";
+            $wiki_content .= htmlspecialchars($modal_data['Author']) . "\n\n";
+        }
+        
+        $result = Database::get()->query("INSERT INTO wiki_properties SET
+            course_id = ?d,
+            title = ?s,
+            description = ?s,
+            group_id = 0,
+            visible = 1",
+            $this->course_id,
+            $title,
+            'CDM imported wiki: ' . $description
+        );
+
+        $wiki_id = $result->lastInsertID;
+
+        // Create initial wiki page
+        $result2 = Database::get()->query("INSERT INTO wiki_pages SET
+            wiki_id = ?d,
+            owner_id = ?d,
+            title = ?s,
+            last_version = 1,
+            ctime = NOW(),
+            last_mtime = NOW()",
+            $wiki_id,
+            $_SESSION['uid'],
+            $title
+        );
+
+        $page_id = $result2->lastInsertID;
+
+        // Create page revision
+        Database::get()->query("INSERT INTO wiki_pages_content SET
+            pid = ?d,
+            content = ?s,
+            editor_id = ?d,
+            mtime = NOW()",
+            $page_id,
+            $wiki_content,
+            $_SESSION['uid']
+        );
+    }
+
+    /**
+     * Ensure default forum exists for the course
+     */
+    private function ensureDefaultForum() {
+        // First, ensure we have a default forum category
+        $cat_id = $this->ensureDefaultForumCategory();
+
+        // Check if course already has a forum
+        $existing_forum = Database::get()->querySingle(
+            "SELECT id FROM forum WHERE course_id = ?d LIMIT 1",
+            $this->course_id
+        );
+
+        if ($existing_forum) {
+            // Update existing forum to use proper category if needed
+            Database::get()->query("UPDATE forum SET cat_id = ?d WHERE id = ?d AND cat_id = 0",
+                $cat_id, $existing_forum->id);
+            return $existing_forum->id;
+        }
+
+        // Create default forum for the course with proper category
+        $result = Database::get()->query("INSERT INTO forum SET
+            name = 'CDM Discussions',
+            `desc` = 'Forum created from CDM import for course discussions',
+            num_topics = 0,
+            num_posts = 0,
+            last_post_id = 0,
+            cat_id = ?d,
+            course_id = ?d",
+            $cat_id,
+            $this->course_id
+        );
+
+        return $result->lastInsertID;
+    }
+
+    /**
+     * Ensure default forum category exists for the course
+     */
+    private function ensureDefaultForumCategory() {
+        // Check if course already has forum categories
+        $existing_category = Database::get()->querySingle(
+            "SELECT id FROM forum_category WHERE course_id = ?d LIMIT 1",
+            $this->course_id
+        );
+
+        if ($existing_category) {
+            return $existing_category->id;
+        }
+
+        // Create default forum category
+        $result = Database::get()->query("INSERT INTO forum_category SET
+            cat_title = 'General Discussions',
+            cat_order = 1,
+            course_id = ?d",
+            $this->course_id
+        );
+
+        return $result->lastInsertID;
+    }
+
+    /**
      * Import flow units as course sections with comprehensive details
      */
     private function importFlowUnits($flow_sub) {
@@ -602,7 +882,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['cdm_file'])) {
 
         $data['success_message'] = "Course successfully imported with full CDM details!";
         $data['course_info'] = $result;
-        $data['course_url'] = $urlAppend . "/courses/" . $result['course_code'] . "/";
+        $data['course_url'] = $urlAppend . "courses/" . $result['course_code'] . "/";
 
     } catch (Exception $e) {
         $data['error_message'] = "Error: " . $e->getMessage();
@@ -716,7 +996,7 @@ $data['menuTypeID'] = 1;
                             <a href="<?php echo htmlspecialchars($data['course_url']); ?>" class="btn btn-success">
                                 👁️ View Course
                             </a>
-                            <a href="<?php echo $urlAppend; ?>/modules/auth/info_course.php?c=<?php echo $data['course_info']['course_id']; ?>" class="btn btn-info">
+                            <a href="<?php echo $urlAppend; ?>modules/auth/info_course.php?c=<?php echo $data['course_info']['course_id']; ?>" class="btn btn-info">
                                 📋 Course Info Page
                             </a>
                         </div>
