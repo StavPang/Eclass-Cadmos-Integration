@@ -141,26 +141,7 @@ bd09c45ad - Fix errors in buttons about cdm extraction
 | `main/portfolio_functions.php` | Modified | Portfolio-level course operations |
 | `modules/create_course/functions.php` | Referenced | Course creation utilities |
 
----
 
-## 📚 Documentation Files
-
-### Original Documentation (Dec 2025)
-| File | Purpose |
-|------|---------|
-| `CDM_ECLASS_MAPPING.md` | Comprehensive resource mapping documentation |
-| `CDM_OpenEClass_Mapping_Logic.md` | Complete integration guide with data flow |
-| `CDM_Development_Steps.md` | Development workflow documentation |
-| `CDM_FILES_FOR_MODIFICATION.md` | File modification guide for developers |
-
-### New Documentation (Jan 31, 2026) ✨
-| File | Purpose | Size |
-|------|---------|------|
-| `IMPLEMENTATION_SUMMARY.md` | Complete implementation details and metrics | 17 KB |
-| `TESTING_GUIDE.md` | Comprehensive testing procedures and validation | 12 KB |
-| `test_cdm_complete.json` | Test data with all 14 resource types | 12 KB |
-| `complete_resource_test.cdm` | Ready-to-use test CDM file | 3 KB |
-| `CDM_CHANGES_LOG.md` | This file (updated) | 8+ KB |
 
 ---
 
