@@ -319,15 +319,67 @@ class CDMImporter {
     /**
      * Import activities and resources
      */
-    private function importActivities($activities, $parent_id = null) {
+    private function importActivities($activities, $parent_id = null, $parent_type = null) {
         foreach ($activities as $activity) {
+            // Children of an activity-simple are handled by merging into their parent; skip here.
+            if ($parent_type === 'activity-simple') {
+                continue;
+            }
+
+            $original_type = $activity['type'] ?? 'activity-simple';
+
+            // For activity-simple nodes with activity-resource children, merge the child's
+            // technical fields (Type, ResourceLocation) into the parent's rich ModalData,
+            // then create the resource using the parent's rich details.
+            $activity = $this->mergeChildResourceIntoParent($activity);
+
             $this->createCourseModule($activity);
 
-            // Import children activities
-            if (!empty($activity['children'])) {
-                $this->importActivities($activity['children'], $activity['id']);
+            // Do not recurse into children of (original) activity-simple nodes —
+            // their children have already been merged into the parent above.
+            if (!empty($activity['children']) && $original_type !== 'activity-simple') {
+                $this->importActivities($activity['children'], $activity['id'], $original_type);
             }
         }
+    }
+
+    /**
+     * Merge the first activity-resource child's technical fields (Type, ResourceLocation)
+     * into the parent activity-simple's rich ModalData, then promote it to activity-resource
+     * so createCourseModule routes it to the correct handler.
+     * Parent's Title, Description, and LearningGoal are always preserved.
+     */
+    private function mergeChildResourceIntoParent($activity) {
+        if (($activity['type'] ?? '') !== 'activity-simple' || empty($activity['children'])) {
+            return $activity;
+        }
+
+        foreach ($activity['children'] as $child) {
+            if (($child['type'] ?? '') === 'activity-resource' && !empty($child['ModalData'])) {
+                $child_modal = $child['ModalData'];
+
+                if (!isset($activity['ModalData'])) {
+                    $activity['ModalData'] = [];
+                }
+
+                // Merge only technical fields from child — preserve parent's rich Title, Description, LearningGoal
+                if (!empty($child_modal['Type'])) {
+                    $activity['ModalData']['Type'] = $child_modal['Type'];
+                }
+                if (!empty($child_modal['ResourceLocation'])) {
+                    $activity['ModalData']['ResourceLocation'] = $child_modal['ResourceLocation'];
+                }
+                if (isset($child_modal['IsStoredFile'])) {
+                    $activity['ModalData']['IsStoredFile'] = $child_modal['IsStoredFile'];
+                }
+
+                // Promote to activity-resource so createCourseModule routes it correctly
+                $activity['type'] = 'activity-resource';
+                break;
+            }
+        }
+
+        return $activity;
     }
 
     /**
